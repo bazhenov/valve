@@ -24,20 +24,21 @@ public class ServerHandler extends SimpleChannelHandler {
 	@Override
 	public void channelOpen(final ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
 		final Channel clientChannel = e.getChannel();
-		clientChannel.setReadable(false);
 
-		ClientBootstrap bootstrap = new ClientBootstrap(factory);
-		bootstrap.setPipeline(pipeline(new HttpRequestEncoder(), new HttpResponseDecoder(), new ReplyResponse(clientChannel)));
+		RequestContext requestContext = new RequestContext(clientChannel);
+		requestContext.suspendClientChannel();
+		ctx.setAttachment(requestContext);
+
 		System.out.println("Inbound connection from: " + clientChannel.getRemoteAddress());
 
-		ChannelFuture future = bootstrap.connect(new InetSocketAddress(hostname, port));
+		ChannelFuture future = createUpLinkChannel(clientChannel);
 		future.addListener(new ChannelFutureListener() {
 			@Override
 			public void operationComplete(ChannelFuture future) throws Exception {
 				if (future.isSuccess()) {
 					System.out.println("Connected to: " + future.getChannel().getRemoteAddress());
-					ctx.setAttachment(future.getChannel());
-					clientChannel.setReadable(true);
+					RequestContext ctxAttachment = (RequestContext) ctx.getAttachment();
+					ctxAttachment.setServerChannel(future.getChannel());
 				} else {
 					System.out.println("Connection failed");
 					clientChannel.close();
@@ -46,12 +47,19 @@ public class ServerHandler extends SimpleChannelHandler {
 		});
 	}
 
+	private ChannelFuture createUpLinkChannel(Channel clientChannel) {
+		ClientBootstrap bootstrap = new ClientBootstrap(factory);
+		bootstrap.setPipeline(pipeline(new HttpRequestEncoder(), new HttpResponseDecoder(), new ReplyResponse(clientChannel)));
+
+		return bootstrap.connect(new InetSocketAddress(hostname, port));
+	}
+
 	@Override
 	public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
 		HttpRequest request = (HttpRequest) e.getMessage();
 		System.out.println("Proxying: " + request.getUri());
-		Channel serverChannel = (Channel) ctx.getAttachment();
-		serverChannel.write(request);
+		RequestContext requestContext = (RequestContext) ctx.getAttachment();
+		requestContext.getServerChannel().write(request);
 	}
 
 	@Override
