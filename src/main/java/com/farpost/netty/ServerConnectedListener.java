@@ -23,7 +23,7 @@ public class ServerConnectedListener implements ChannelFutureListener {
 			log.debug("Connected to: {}", channel.getRemoteAddress());
 		} else {
 			requestContext.serverChannelFailed(channel);
-			log.error("Connection failed", future.getCause());
+			log.warn("Connection failed", future.getCause());
 		}
 	}
 }

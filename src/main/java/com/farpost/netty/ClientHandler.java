@@ -30,7 +30,7 @@ public class ClientHandler extends SimpleChannelHandler {
 	public void channelOpen(final ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
 		final Channel clientChannel = e.getChannel();
 
-		RequestContext requestContext = new RequestContext(clientChannel, 2);
+		RequestContext requestContext = new RequestContext(clientChannel, remotes.size());
 		requestContext.suspendClientChannel();
 		ctx.setAttachment(requestContext);
 

@@ -11,6 +11,7 @@ public class App {
 		Proxy proxy = new Proxy();
 		proxy.addRemote(new InetSocketAddress("localhost", 8081));
 		proxy.addRemote(new InetSocketAddress("localhost", 8082));
+		proxy.addRemote(new InetSocketAddress("localhost", 8083));
 		proxy.run();
 	}
 }
