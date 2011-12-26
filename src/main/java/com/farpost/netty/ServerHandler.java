@@ -31,25 +31,13 @@ public class ServerHandler extends SimpleChannelHandler {
 
 		System.out.println("Inbound connection from: " + clientChannel.getRemoteAddress());
 
-		ChannelFuture future = createUpLinkChannel(clientChannel);
-		future.addListener(new ChannelFutureListener() {
-			@Override
-			public void operationComplete(ChannelFuture future) throws Exception {
-				if (future.isSuccess()) {
-					System.out.println("Connected to: " + future.getChannel().getRemoteAddress());
-					RequestContext ctxAttachment = (RequestContext) ctx.getAttachment();
-					ctxAttachment.setServerChannel(future.getChannel());
-				} else {
-					System.out.println("Connection failed");
-					clientChannel.close();
-				}
-			}
-		});
+		ChannelFuture future = createServerChannel(requestContext, hostname, port);
+		future.addListener(new ServerConnectedListener(requestContext));
 	}
 
-	private ChannelFuture createUpLinkChannel(Channel clientChannel) {
+	private ChannelFuture createServerChannel(RequestContext context, String hostname, int port) {
 		ClientBootstrap bootstrap = new ClientBootstrap(factory);
-		bootstrap.setPipeline(pipeline(new HttpRequestEncoder(), new HttpResponseDecoder(), new ReplyResponse(clientChannel)));
+		bootstrap.setPipeline(pipeline(new HttpRequestEncoder(), new HttpResponseDecoder(), new ReplyResponse(context)));
 
 		return bootstrap.connect(new InetSocketAddress(hostname, port));
 	}

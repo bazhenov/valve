@@ -23,4 +23,8 @@ public class RequestContext {
 	public void suspendClientChannel() {
 		clientChannel.setReadable(false);
 	}
+
+	public Channel getClientChannel() {
+		return clientChannel;
+	}
 }
