@@ -1,6 +1,8 @@
 package com.farpost.netty;
 
 import org.jboss.netty.channel.Channel;
+import org.jboss.netty.channel.ChannelFuture;
+import org.jboss.netty.channel.ChannelFutureListener;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 
 import java.util.LinkedList;
@@ -40,7 +42,7 @@ public class RequestContext {
 
 	public synchronized void write(Object message) {
 		for (Channel c : serverChannels) {
-			c.write(message);
+			c.write(message).addListener(new PrintError("Unable to write to server"));
 		}
 	}
 

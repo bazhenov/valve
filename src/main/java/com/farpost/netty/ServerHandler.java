@@ -1,5 +1,6 @@
 package com.farpost.netty;
 
+import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.*;
 
 public class ServerHandler extends SimpleChannelHandler {
@@ -14,7 +15,7 @@ public class ServerHandler extends SimpleChannelHandler {
 	public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
 		if (requestContext.isWinnerOrFirst(e.getChannel())) {
 			System.out.println(e.getRemoteAddress() + " response " + e.getMessage().getClass());
-			requestContext.getClientChannel().write(e.getMessage());
+			requestContext.getClientChannel().write(e.getMessage()).addListener(new PrintError("Unable to write to client"));
 		}
 	}
 
@@ -27,7 +28,13 @@ public class ServerHandler extends SimpleChannelHandler {
 	public void channelClosed(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
 		if (requestContext.isWinner(e.getChannel())) {
 			System.out.println("Closing client socket");
-			requestContext.getClientChannel().close();
+			closeOnFlush(requestContext.getClientChannel());
+		}
+	}
+
+	private void closeOnFlush(Channel channel) {
+		if (channel.isConnected()) {
+			channel.write(ChannelBuffers.EMPTY_BUFFER).addListener(ChannelFutureListener.CLOSE);
 		}
 	}
 }

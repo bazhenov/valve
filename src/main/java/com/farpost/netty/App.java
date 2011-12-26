@@ -12,6 +12,7 @@ import org.jboss.netty.handler.codec.http.HttpRequestDecoder;
 import org.jboss.netty.handler.codec.http.HttpResponseEncoder;
 
 import java.net.InetSocketAddress;
+import java.util.concurrent.ExecutorService;
 
 import static java.util.concurrent.Executors.newCachedThreadPool;
 
@@ -21,8 +22,9 @@ import static java.util.concurrent.Executors.newCachedThreadPool;
 public class App {
 
 	public static void main(String[] args) {
-		ChannelFactory factory = new NioServerSocketChannelFactory(newCachedThreadPool(), newCachedThreadPool());
-		final ClientSocketChannelFactory clientFactory = new NioClientSocketChannelFactory(newCachedThreadPool(), newCachedThreadPool());
+		ExecutorService executor = newCachedThreadPool();
+		ChannelFactory factory = new NioServerSocketChannelFactory(executor, executor);
+		final ClientSocketChannelFactory clientFactory = new NioClientSocketChannelFactory(executor, executor);
 
 		final ServerBootstrap bootstrap = new ServerBootstrap(factory);
 		bootstrap.setPipelineFactory(new ChannelPipelineFactory() {
