@@ -1,23 +1,33 @@
 package com.farpost.netty;
 
 import org.jboss.netty.channel.Channel;
+import org.jboss.netty.handler.codec.http.HttpRequest;
+
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class RequestContext {
 
 	private final Channel clientChannel;
-	private volatile Channel serverChannel;
+	private final int serverChannelsNo;
+	private final List<Channel> serverChannels = new LinkedList<Channel>();
+	private final AtomicReference<Channel> winnerChannel = new AtomicReference<Channel>();
 
-	public RequestContext(Channel clientChannel) {
+	public RequestContext(Channel clientChannel, int serverChannelsNo) {
 		this.clientChannel = clientChannel;
+		this.serverChannelsNo = serverChannelsNo;
 	}
 
-	public void setServerChannel(Channel serverChannel) {
-		this.serverChannel = serverChannel;
-		clientChannel.setReadable(true);
+	public synchronized void addServerChannel(Channel serverChannel) {
+		this.serverChannels.add(serverChannel);
+		if (serverChannels.size() >= serverChannelsNo) {
+			clientChannel.setReadable(true);
+		}
 	}
 
-	public Channel getServerChannel() {
-		return serverChannel;
+	public List<Channel> getServerChannels() {
+		return serverChannels;
 	}
 
 	public void suspendClientChannel() {
@@ -26,5 +36,19 @@ public class RequestContext {
 
 	public Channel getClientChannel() {
 		return clientChannel;
+	}
+
+	public synchronized void write(Object message) {
+		for (Channel c : serverChannels) {
+			c.write(message);
+		}
+	}
+
+	public boolean isWinnerOrFirst(Channel channel) {
+		return winnerChannel.get() == channel || winnerChannel.compareAndSet(null, channel);
+	}
+
+	public boolean isWinner(Channel channel) {
+		return winnerChannel.get() == channel;
 	}
 }

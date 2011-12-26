@@ -28,7 +28,7 @@ public class App {
 		bootstrap.setPipelineFactory(new ChannelPipelineFactory() {
 			@Override
 			public ChannelPipeline getPipeline() throws Exception {
-				return Channels.pipeline(new HttpRequestDecoder(), new HttpResponseEncoder(), new ServerHandler(clientFactory));
+				return Channels.pipeline(new HttpRequestDecoder(), new HttpResponseEncoder(), new ClientHandler(clientFactory));
 			}
 		});
 

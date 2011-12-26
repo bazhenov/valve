@@ -15,7 +15,7 @@ public class ServerConnectedListener implements ChannelFutureListener {
 	public void operationComplete(ChannelFuture future) throws Exception {
 		if (future.isSuccess()) {
 			System.out.println("Connected to: " + future.getChannel().getRemoteAddress());
-			requestContext.setServerChannel(future.getChannel());
+			requestContext.addServerChannel(future.getChannel());
 		} else {
 			System.out.println("Connection failed");
 			requestContext.getClientChannel().close();
