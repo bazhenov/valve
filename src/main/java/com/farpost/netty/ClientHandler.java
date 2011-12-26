@@ -6,14 +6,18 @@ import org.jboss.netty.channel.socket.ClientSocketChannelFactory;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpRequestEncoder;
 import org.jboss.netty.handler.codec.http.HttpResponseDecoder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 
 import static org.jboss.netty.channel.Channels.pipeline;
 
 public class ClientHandler extends SimpleChannelHandler {
 
 	private final ChannelFactory factory;
+	private static final Logger log = LoggerFactory.getLogger(ClientHandler.class);
 
 	public ClientHandler(ClientSocketChannelFactory factory) {
 		this.factory = factory;
@@ -27,17 +31,17 @@ public class ClientHandler extends SimpleChannelHandler {
 		requestContext.suspendClientChannel();
 		ctx.setAttachment(requestContext);
 
-		System.out.println("Inbound connection from: " + clientChannel.getRemoteAddress());
+		log.debug("Inbound connection from: {}", clientChannel.getRemoteAddress());
 
-		createServerChannel(requestContext, "localhost", 8081);
-		createServerChannel(requestContext, "localhost", 8082);
+		createServerChannel(requestContext, new InetSocketAddress("localhost", 8081));
+		createServerChannel(requestContext, new InetSocketAddress("localhost", 8082));
 	}
 
-	private ChannelFuture createServerChannel(RequestContext context, String hostname, int port) {
+	private ChannelFuture createServerChannel(RequestContext context, SocketAddress remote) {
 		ClientBootstrap bootstrap = new ClientBootstrap(factory);
 		bootstrap.setPipeline(pipeline(new HttpRequestEncoder(), new HttpResponseDecoder(), new ServerHandler(context)));
 
-		ChannelFuture future = bootstrap.connect(new InetSocketAddress(hostname, port));
+		ChannelFuture future = bootstrap.connect(remote);
 		future.addListener(new ServerConnectedListener(context));
 		return future;
 	}
@@ -45,15 +49,16 @@ public class ClientHandler extends SimpleChannelHandler {
 	@Override
 	public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
 		HttpRequest request = (HttpRequest) e.getMessage();
-		System.out.println("Proxying: " + request.getUri());
+
+		log.debug("Proxying: {}", request.getUri());
 		RequestContext requestContext = (RequestContext) ctx.getAttachment();
 		requestContext.write(request);
 	}
 
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception {
-		e.getCause().printStackTrace(System.err);
-
+		Throwable cause = e.getCause();
+		log.error(cause.getMessage(), cause);
 		e.getChannel().close();
 	}
 }

@@ -1,15 +1,16 @@
 package com.farpost.netty;
 
 import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelFuture;
-import org.jboss.netty.channel.ChannelFutureListener;
-import org.jboss.netty.handler.codec.http.HttpRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class RequestContext {
+
+	private static final Logger log = LoggerFactory.getLogger(RequestContext.class);
 
 	private final Channel clientChannel;
 	private final int serverChannelsNo;
@@ -28,10 +29,6 @@ public class RequestContext {
 		}
 	}
 
-	public List<Channel> getServerChannels() {
-		return serverChannels;
-	}
-
 	public void suspendClientChannel() {
 		clientChannel.setReadable(false);
 	}
@@ -42,7 +39,7 @@ public class RequestContext {
 
 	public synchronized void write(Object message) {
 		for (Channel c : serverChannels) {
-			c.write(message).addListener(new PrintError("Unable to write to server"));
+			c.write(message).addListener(new LogError("Unable to write to server", log));
 		}
 	}
 
