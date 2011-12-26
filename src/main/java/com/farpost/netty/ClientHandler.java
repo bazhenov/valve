@@ -9,18 +9,21 @@ import org.jboss.netty.handler.codec.http.HttpResponseDecoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.jboss.netty.channel.Channels.pipeline;
 
 public class ClientHandler extends SimpleChannelHandler {
 
 	private final ChannelFactory factory;
+	private final List<SocketAddress> remotes;
 	private static final Logger log = LoggerFactory.getLogger(ClientHandler.class);
 
-	public ClientHandler(ClientSocketChannelFactory factory) {
+	public ClientHandler(ClientSocketChannelFactory factory, List<SocketAddress> remotes) {
 		this.factory = factory;
+		this.remotes = new ArrayList<SocketAddress>(remotes);
 	}
 
 	@Override
@@ -33,8 +36,9 @@ public class ClientHandler extends SimpleChannelHandler {
 
 		log.debug("Inbound connection from: {}", clientChannel.getRemoteAddress());
 
-		createServerChannel(requestContext, new InetSocketAddress("localhost", 8081));
-		createServerChannel(requestContext, new InetSocketAddress("localhost", 8082));
+		for (SocketAddress remote : remotes) {
+			createServerChannel(requestContext, remote);
+		}
 	}
 
 	private ChannelFuture createServerChannel(RequestContext context, SocketAddress remote) {

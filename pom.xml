@@ -14,6 +14,10 @@
 		<version>1.0.9</version>
 	</parent>
 
+	<properties>
+		<logback.configurationFile>${basedir}/logback.xml</logback.configurationFile>
+	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.jboss.netty</groupId>
@@ -37,6 +41,11 @@
 			<artifactId>logback-core</artifactId>
 			<version>0.9.28</version>
 			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-web</artifactId>
+			<version>3.0.5.RELEASE</version>
 		</dependency>
 	</dependencies>
 

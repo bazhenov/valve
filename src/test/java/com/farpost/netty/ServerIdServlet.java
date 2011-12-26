@@ -8,14 +8,19 @@ import java.io.IOException;
 
 public class ServerIdServlet extends HttpServlet {
 
-	private final int serverId;
+	private final String id;
 
 	public ServerIdServlet(int serverId) {
-		this.serverId = serverId;
+		id = "ServerID#" + serverId;
 	}
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		resp.getWriter().write("ServerID#" + serverId);
+		resp.setHeader("Content-type", "text/plain; charset=utf8");
+		resp.getWriter().write(id);
+	}
+
+	public String getId() {
+		return id;
 	}
 }

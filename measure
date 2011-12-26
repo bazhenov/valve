@@ -1,0 +1,17 @@
+#!/usr/bin/env php
+<?php
+$host = $argv[1];
+$slowRequests = 0;
+$requests = @$argv[2] ?: 200;
+$failed = 0;
+for ($i=0; $i<$requests; $i++) {
+	echo ".";
+	$start = microtime(true);
+	$content = file_get_contents($argv[1]);
+	if (strpos($content, "#") === false) $failed++;
+	$end = microtime(true);
+	if ($end - $start > 0.3) $slowRequests++;
+}
+
+echo "\n";
+echo round($slowRequests/$requests*100, 2)."% requests >300ms (failed: {$failed})\n";
