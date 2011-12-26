@@ -2,11 +2,11 @@
 
 	<appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
 		<encoder>
-			<pattern>%d{HH:mm:ss} [%thread] %.-1level %logger{36} - %msg%n%mdc%n%ex{6}</pattern>
+			<pattern>%d{HH:mm:ss} [%thread] %.-1level %logger{36} - %msg%n%ex{6}</pattern>
 		</encoder>
 	</appender>
 
-	<logger name="com.farpost" level="info"/>
+	<logger name="com.farpost" level="debug"/>
 
 	<root level="warn">
 		<appender-ref ref="stdout"/>

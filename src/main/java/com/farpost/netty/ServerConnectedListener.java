@@ -17,11 +17,12 @@ public class ServerConnectedListener implements ChannelFutureListener {
 
 	@Override
 	public void operationComplete(ChannelFuture future) throws Exception {
+		Channel channel = future.getChannel();
 		if (future.isSuccess()) {
-			Channel channel = future.getChannel();
-			requestContext.addServerChannel(channel);
+			requestContext.serverChannelReady(channel);
 			log.debug("Connected to: {}", channel.getRemoteAddress());
 		} else {
+			requestContext.serverChannelFailed(channel);
 			log.error("Connection failed", future.getCause());
 		}
 	}

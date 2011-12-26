@@ -14,7 +14,8 @@ public class RequestContext {
 
 	private final Channel clientChannel;
 	private final int serverChannelsNo;
-	private final List<Channel> serverChannels = new LinkedList<Channel>();
+	private final List<Channel> readyServerChannels = new LinkedList<Channel>();
+	private List<Channel> failedServerChannels = new LinkedList<Channel>();
 	private final AtomicReference<Channel> winnerChannel = new AtomicReference<Channel>();
 
 	public RequestContext(Channel clientChannel, int serverChannelsNo) {
@@ -22,9 +23,18 @@ public class RequestContext {
 		this.serverChannelsNo = serverChannelsNo;
 	}
 
-	public synchronized void addServerChannel(Channel serverChannel) {
-		this.serverChannels.add(serverChannel);
-		if (serverChannels.size() >= serverChannelsNo) {
+	public synchronized void serverChannelReady(Channel serverChannel) {
+		this.readyServerChannels.add(serverChannel);
+		checkClient();
+	}
+
+	public synchronized void serverChannelFailed(Channel channel) {
+		this.failedServerChannels.add(channel);
+		checkClient();
+	}
+
+	private void checkClient() {
+		if (readyServerChannels.size() + failedServerChannels.size() >= serverChannelsNo) {
 			clientChannel.setReadable(true);
 		}
 	}
@@ -38,7 +48,7 @@ public class RequestContext {
 	}
 
 	public synchronized void write(Object message) {
-		for (Channel c : serverChannels) {
+		for (Channel c : readyServerChannels) {
 			c.write(message).addListener(new LogError("Unable to write to server", log));
 		}
 	}
