@@ -3,10 +3,11 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.farpost.vale</groupId>
-	<artifactId>valve-core</artifactId>
+	<artifactId>valve-parent</artifactId>
 	<version>1.0-SNAPSHOT</version>
-	<packaging>jar</packaging>
-	<name>Multiplexing Proxy</name>
+	<packaging>pom</packaging>
+	<name>Valve Project</name>
+	<description>Nonblocking multiplexing proxy designed for web-service orchestration</description>
 
 	<parent>
 		<groupId>com.farpost.maven</groupId>
@@ -15,21 +16,10 @@
 	</parent>
 
 	<properties>
-		<logback.configurationFile>${basedir}/logback.xml</logback.configurationFile>
+		<logback.configurationFile>${basedir}/../logback.xml</logback.configurationFile>
 	</properties>
 
 	<dependencies>
-		<dependency>
-			<groupId>org.jboss.netty</groupId>
-			<artifactId>netty</artifactId>
-			<version>3.2.7.Final</version>
-		</dependency>
-		<dependency>
-			<groupId>org.mortbay.jetty</groupId>
-			<artifactId>jetty</artifactId>
-			<version>6.1.26</version>
-		</dependency>
-
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
@@ -42,11 +32,10 @@
 			<version>0.9.28</version>
 			<scope>compile</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-web</artifactId>
-			<version>3.0.5.RELEASE</version>
-		</dependency>
 	</dependencies>
+
+	<modules>
+		<module>valve-core</module>
+	</modules>
 
 </project>
