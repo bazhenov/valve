@@ -35,7 +35,7 @@ public class RequestContext {
 
 	private void checkClient() {
 		if (readyServerChannels.size() + failedServerChannels.size() >= serverChannelsNo) {
-			log.info("Mark client channel as readable");
+			log.trace("Mark client channel as readable");
 			clientChannel.setReadable(true);
 		}
 	}

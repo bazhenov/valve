@@ -19,7 +19,7 @@ public class App {
 		proxy.setPort(port);
 		for (String host : args) {
 			String parts[] = host.split(":");
-			log.info("Running proxy on port {}", port);
+			log.debug("Adding remote: {}", host);
 			proxy.addRemote(new InetSocketAddress(parts[0], parseInt(parts[1])));
 		}
 		log.info("Running proxy on port {}", port);

@@ -20,7 +20,7 @@ public class ServerConnectedListener implements ChannelFutureListener {
 		Channel channel = future.getChannel();
 		if (future.isSuccess()) {
 			requestContext.serverChannelReady(channel);
-			log.debug("Connected to: {}", channel.getRemoteAddress());
+			log.trace("Connected to: {}", channel.getRemoteAddress());
 		} else {
 			requestContext.serverChannelFailed(channel);
 			log.warn("Connection failed", future.getCause());

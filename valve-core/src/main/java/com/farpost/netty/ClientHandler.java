@@ -15,11 +15,15 @@ import java.util.List;
 
 import static org.jboss.netty.channel.Channels.pipeline;
 
+/**
+ * Данный {@link SimpleChannelHandler} обслуживает канал связи между прокси и клиентов (downlink channel)
+ */
 public class ClientHandler extends SimpleChannelHandler {
+
+	private static final Logger log = LoggerFactory.getLogger(ClientHandler.class);
 
 	private final ChannelFactory factory;
 	private final List<SocketAddress> remotes;
-	private static final Logger log = LoggerFactory.getLogger(ClientHandler.class);
 
 	public ClientHandler(ClientSocketChannelFactory factory, List<SocketAddress> remotes) {
 		this.factory = factory;
@@ -34,7 +38,7 @@ public class ClientHandler extends SimpleChannelHandler {
 		requestContext.suspendClientChannel();
 		ctx.setAttachment(requestContext);
 
-		log.debug("Inbound connection from: {}", clientChannel.getRemoteAddress());
+		log.trace("Inbound connection from: {}", clientChannel.getRemoteAddress());
 
 		for (SocketAddress remote : remotes) {
 			createServerChannel(requestContext, remote);
@@ -52,11 +56,13 @@ public class ClientHandler extends SimpleChannelHandler {
 
 	@Override
 	public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
-		HttpRequest request = (HttpRequest) e.getMessage();
-
-		log.debug("Proxying: {}", request.getUri());
+		Object msg = e.getMessage();
+		if (msg instanceof HttpRequest) {
+			HttpRequest request = (HttpRequest) msg;
+			log.debug("Proxying: {}", request.getUri());
+		}
 		RequestContext requestContext = (RequestContext) ctx.getAttachment();
-		requestContext.write(request);
+		requestContext.write(msg);
 	}
 
 	@Override
